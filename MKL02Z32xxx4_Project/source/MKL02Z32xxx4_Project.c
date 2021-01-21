@@ -43,7 +43,11 @@
 
 #include "sdk_hal_gpio.h"
 #include "sdk_hal_uart0.h"
-//#include "sdk_hal_i2c0.h"
+#include "sdk_hal_i2c0.h"
+
+
+#define MMA851_I2C_DEVICE_ADDRESS	0x1D
+#define MMA8451_WHO_AM_I_MEMORY_ADDRESS		0x0D
 
 /* TODO: insert other include files here. */
 
@@ -53,7 +57,7 @@
  * @brief   Application entry point.
  */
 int main(void) {
-
+	uint8_t	nuevo_dato_i2c;
 	uint8_t nuevo_byte_uart;
     status_t status;
   	/* Init board hardware. */
@@ -66,6 +70,7 @@ int main(void) {
 #endif
 
     (void)uart0Inicializar(115200);
+    (void)i2c0MasterInit(100000);
 
     PRINTF("Hello World\n");
 
@@ -100,6 +105,13 @@ int main(void) {
    					gpioPutValue(KPTB6,0);
    					break;
 
+   				case 'M':
+   					i2c0MasterReadByte(&nuevo_dato_i2c, MMA851_I2C_DEVICE_ADDRESS, MMA8451_WHO_AM_I_MEMORY_ADDRESS);
+   					if(nuevo_dato_i2c==0x1A){
+   						printf("MMA8451 ENCONTRADO!!");
+   					}else{
+   						printf("MMA8451 NO ENCONTRADO!!");
+   					}
    				}
        		}else{
        			printf("error\r\n");
