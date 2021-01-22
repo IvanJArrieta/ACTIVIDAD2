@@ -48,7 +48,9 @@
 
 #define MMA851_I2C_DEVICE_ADDRESS	0x1D
 #define MMA8451_WHO_AM_I_MEMORY_ADDRESS		0x0D
-
+#define MMA8451_OUT_X_MSB		0x01
+#define MMA8451_OUT_X_LSB		0x02
+#define ACCEL_CTRL_REG1 0x2A
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
@@ -57,10 +59,15 @@
  * @brief   Application entry point.
  */
 int main(void) {
-	uint8_t	nuevo_dato_i2c;
+	uint16_t	nuevo_dato_i2c;
+	uint16_t toma_de_datos_xu;
+	uint16_t toma_de_datos_xl;
+	uint16_t toma_de_datos_xt;
 	uint8_t nuevo_byte_uart;
     status_t status;
+
   	/* Init board hardware. */
+
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
@@ -108,11 +115,21 @@ int main(void) {
    				case 'M':
    					i2c0MasterReadByte(&nuevo_dato_i2c, MMA851_I2C_DEVICE_ADDRESS, MMA8451_WHO_AM_I_MEMORY_ADDRESS);
    					if(nuevo_dato_i2c==0x1A){
+   						i2c0MasterWriteByte(MMA851_I2C_DEVICE_ADDRESS, ACCEL_CTRL_REG1, 0x0D);
    						printf("MMA8451 ENCONTRADO!!");
    					}else{
    						printf("MMA8451 NO ENCONTRADO!!");
    					}
-   				}
+   					break;
+   				case 'x':
+   				case 'X':
+   					i2c0MasterReadByte(&toma_de_datos_xu, MMA851_I2C_DEVICE_ADDRESS, MMA8451_OUT_X_MSB);
+   					i2c0MasterReadByte(&toma_de_datos_xl, MMA851_I2C_DEVICE_ADDRESS, MMA8451_OUT_X_LSB);
+   					toma_de_datos_xu = toma_de_datos_xu << 6;
+   					toma_de_datos_xt = toma_de_datos_xu | toma_de_datos_xl;
+   					printf("valor en X: %d \n\r", toma_de_datos_xt);
+   					break;
+       			}
        		}else{
        			printf("error\r\n");
        		}
