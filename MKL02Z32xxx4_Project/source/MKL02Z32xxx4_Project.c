@@ -1,33 +1,3 @@
-/*
- * Copyright 2016-2021 NXP
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of NXP Semiconductor, Inc. nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
- 
 /**
  * @file    MKL02Z32xxx4_Project.c
  * @brief   Application entry point.
@@ -48,8 +18,14 @@
 
 #define MMA851_I2C_DEVICE_ADDRESS	0x1D
 #define MMA8451_WHO_AM_I_MEMORY_ADDRESS		0x0D
+
 #define MMA8451_OUT_X_MSB		0x01
 #define MMA8451_OUT_X_LSB		0x02
+#define MMA8451_OUT_Y_MSB		0x03
+#define MMA8451_OUT_Y_LSB		0x04
+#define MMA8451_OUT_Z_MSB		0x05
+#define MMA8451_OUT_Z_LSB		0x06
+
 #define ACCEL_CTRL_REG1 0x2A
 /* TODO: insert other include files here. */
 
@@ -60,11 +36,22 @@
  */
 int main(void) {
 	uint16_t	nuevo_dato_i2c;
-	uint16_t toma_de_datos_xu;
-	uint16_t toma_de_datos_xl;
-	uint16_t toma_de_datos_xt;
 	uint8_t nuevo_byte_uart;
     status_t status;
+
+ /*Variables donde se guardaran los valores de X, Y, Z */
+    uint16_t toma_de_datos_xu;
+   	uint16_t toma_de_datos_xl;
+    uint16_t toma_de_datos_xt;
+
+    uint16_t toma_de_datos_yu;
+   	uint16_t toma_de_datos_yl;
+    uint16_t toma_de_datos_yt;
+
+    uint16_t toma_de_datos_zu;
+    uint16_t toma_de_datos_zl;
+    uint16_t toma_de_datos_zt;
+  /*Fin de variables de toma de datos*/
 
   	/* Init board hardware. */
 
@@ -125,9 +112,19 @@ int main(void) {
    				case 'X':
    					i2c0MasterReadByte(&toma_de_datos_xu, MMA851_I2C_DEVICE_ADDRESS, MMA8451_OUT_X_MSB);
    					i2c0MasterReadByte(&toma_de_datos_xl, MMA851_I2C_DEVICE_ADDRESS, MMA8451_OUT_X_LSB);
-   					toma_de_datos_xu = toma_de_datos_xu << 6;
-   					toma_de_datos_xt = toma_de_datos_xu | toma_de_datos_xl;
-   					printf("valor en X: %d \n\r", toma_de_datos_xt);
+
+   					i2c0MasterReadByte(&toma_de_datos_yu, MMA851_I2C_DEVICE_ADDRESS, MMA8451_OUT_Y_MSB);
+   					i2c0MasterReadByte(&toma_de_datos_yl, MMA851_I2C_DEVICE_ADDRESS, MMA8451_OUT_Y_LSB);
+
+   					i2c0MasterReadByte(&toma_de_datos_zu, MMA851_I2C_DEVICE_ADDRESS, MMA8451_OUT_Z_MSB);
+   					i2c0MasterReadByte(&toma_de_datos_zl, MMA851_I2C_DEVICE_ADDRESS, MMA8451_OUT_Z_LSB);
+
+   					toma_de_datos_xt = (toma_de_datos_xu<<6) | (toma_de_datos_xl >>2);
+   					toma_de_datos_yt = (toma_de_datos_yu<<6) | (toma_de_datos_yl >>2);
+   					toma_de_datos_zt = (toma_de_datos_zu<<6) | (toma_de_datos_zl >>2);
+
+   					printf("X: %d Y: %d Z: %d\n\r", toma_de_datos_xt, toma_de_datos_yt, toma_de_datos_zt);
+
    					break;
        			}
        		}else{
